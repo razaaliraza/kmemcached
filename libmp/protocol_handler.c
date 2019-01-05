@@ -6,7 +6,7 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/kthread.h>
-#include <linux/smp_lock.h>
+// #include <linux/smp_lock.h>
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <linux/netdevice.h>
@@ -55,13 +55,13 @@ static ssize_t default_recv(const void *cookie,
   msg.msg_namelen = 0;
   msg.msg_control = NULL;
   msg.msg_controllen = 0;
-  msg.msg_iov = &iov;
-  msg.msg_iovlen = 1;
+  msg.msg_iter.iov = &iov;
+  // msg.msg_iovlen = 1;
   msg.msg_control = NULL;
 
   oldfs = get_fs();
   set_fs(KERNEL_DS);
-  size = sock_recvmsg(sock,&msg,len,msg.msg_flags);
+  size = sock_recvmsg(sock,&msg,msg.msg_flags);
   set_fs(oldfs);
 
   return size;
@@ -105,14 +105,14 @@ static ssize_t default_send(const void *cookie,
   msg.msg_namelen  = 0;
   msg.msg_control = NULL;
   msg.msg_controllen = 0;
-  msg.msg_iov = &iov;
-  msg.msg_iovlen = 1;
+  msg.msg_iter.iov = &iov;
+  // msg.msg_iovlen = 1;
 
   /* TODO: what does this do? */
   // http://mail.nl.linux.org/kernelnewbies/2005-12/msg00282.html
   oldfs = get_fs();
   set_fs(KERNEL_DS);
-  size = sock_sendmsg(sock,&msg,len);
+  size = sock_sendmsg(sock,&msg);
   set_fs(oldfs);
 
   return size;

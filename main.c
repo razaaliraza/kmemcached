@@ -25,7 +25,7 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/workqueue.h>
-#include <linux/smp_lock.h>
+// #include <linux/smp_lock.h>
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <linux/netdevice.h>
@@ -136,7 +136,7 @@ static void queue_client(client_t *client){
 }
 
 /** Callback for new data on a listening socket */
-static void callback_listen(struct sock *sk, int bytes){
+static void callback_listen(struct sock *sk){
     if (sk->sk_state != TCP_LISTEN)
         return;
 
@@ -162,7 +162,7 @@ static void callback_write_space(struct sock *sk){
 }
 
 /** Callback for availability of data to read from a socket. */
-static void callback_data_ready(struct sock *sk, int bytes){
+static void callback_data_ready(struct sock *sk){
     client_t *client = (client_t*) sk->sk_user_data;
 
     if (!test_bit(STATE_ACTIVE, &client->state))
@@ -281,7 +281,7 @@ static int open_listen_socket(void){
     struct sockaddr_in listen_address;
 
     /* create a socket */
-    if ( (err = sock_create_kern(AF_INET, SOCK_STREAM , IPPROTO_TCP, &listen_socket)) < 0)
+    if ( (err = sock_create_kern(current->nsproxy->net_ns, AF_INET, SOCK_STREAM , IPPROTO_TCP, &listen_socket)) < 0)
     {
         printk(KERN_INFO MODULE_NAME": Could not create a TCP socket, error = %d\n", -err);
         return -1;
@@ -367,7 +367,7 @@ int __init kmemcached_init(void)
     }
 
     /* start kernel thread */
-    workqueue = alloc_workqueue(MODULE_NAME, WQ_NON_REENTRANT | WQ_FREEZEABLE, 0);
+    workqueue = alloc_workqueue(MODULE_NAME, WQ_FREEZABLE, 0);
 
     return 0;
 }

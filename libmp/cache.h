@@ -5,6 +5,18 @@
 
 // FIXME: this should use linux slab allocator
 
+#ifdef HAVE_UMEM_H
+#include <umem.h>
+#define cache_t umem_cache_t
+#define cache_alloc(a) umem_cache_alloc(a, UMEM_DEFAULT)
+#define do_cache_alloc(a) umem_cache_alloc(a, UMEM_DEFAULT)
+#define cache_free(a, b) umem_cache_free(a, b)
+#define do_cache_free(a, b) umem_cache_free(a, b)
+#define cache_create(a,b,c,d,e) umem_cache_create((char*)a, b, c, d, e, NULL, NULL, NULL, 0)
+#define cache_destroy(a) umem_cache_destroy(a);
+
+#else
+
 #ifndef NDEBUG
 /* may be used for debug purposes */
 extern int cache_error;
@@ -93,6 +105,7 @@ void cache_destroy(cache_t* handle);
  *         the allocation cannot be satisfied.
  */
 void* cache_alloc(cache_t* handle);
+void* do_cache_alloc(cache_t* handle);
 /**
  * Return an object back to the cache.
  *
@@ -103,5 +116,8 @@ void* cache_alloc(cache_t* handle);
  * @param ptr pointer to the object to return.
  */
 void cache_free(cache_t* handle, void* ptr);
+void do_cache_free(cache_t* handle, void* ptr);
+
+#endif
 
 #endif

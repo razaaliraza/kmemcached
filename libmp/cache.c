@@ -58,7 +58,7 @@ cache_t* cache_create(const char *name, size_t bufsize, size_t align,
     ret->bufsize = bufsize;
 #endif
 
-    (void)align;
+    // (void)align;
 
     return ret;
 }
@@ -88,7 +88,6 @@ void cache_destroy(cache_t *cache) {
 void* cache_alloc(cache_t *cache) {
     void *ret;
     void *object;
-    //pthread_mutex_lock(&cache->mutex);
     if (cache->freecurr > 0) {
         ret = cache->ptr[--cache->freecurr];
         object = get_object(ret);

@@ -38,7 +38,7 @@ static ssize_t default_recv(const void *cookie,
                             size_t len)
 {
   struct msghdr msg;
-  struct iovec iov;
+  struct kvec iov;
   mm_segment_t oldfs;
   int size = 0;
 
@@ -55,9 +55,8 @@ static ssize_t default_recv(const void *cookie,
   msg.msg_namelen = 0;
   msg.msg_control = NULL;
   msg.msg_controllen = 0;
-  msg.msg_iter.iov = &iov;
-  // msg.msg_iovlen = 1;
-  msg.msg_control = NULL;
+
+  iov_iter_kvec(&msg.msg_iter, READ, &iov, 1, len);
 
   oldfs = get_fs();
   set_fs(KERNEL_DS);
@@ -85,7 +84,7 @@ static ssize_t default_send(const void *cookie,
                             size_t len)
 {
   struct msghdr msg;
-  struct iovec iov;
+  struct kvec iov;
   mm_segment_t oldfs;
   int size = 0;
 
@@ -105,8 +104,8 @@ static ssize_t default_send(const void *cookie,
   msg.msg_namelen  = 0;
   msg.msg_control = NULL;
   msg.msg_controllen = 0;
-  msg.msg_iter.iov = &iov;
-  // msg.msg_iovlen = 1;
+
+  iov_iter_kvec(&msg.msg_iter, WRITE, &iov, 1, len);
 
   /* TODO: what does this do? */
   // http://mail.nl.linux.org/kernelnewbies/2005-12/msg00282.html
